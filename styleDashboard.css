@@ -7,8 +7,8 @@ body{
 .container{
     margin-left : 20px ;
     padding-left: 20px;
-    background-color: white;
-    height: 1000px;
+    background-color: lightblue;
+    height:auto;
     width : 900px;
     border-radius: 5px;
     box-shadow: 0px 5px 15px 0px;
@@ -17,6 +17,7 @@ body{
     
 header {
 text-align: center;
+padding-top: 50px;
 }
 h1{
   text-align: center;
@@ -31,4 +32,15 @@ h1{
 
 #input{
   margin-left : 40px ;
+  padding-top: 50px;
+}
+
+#backWeather{
+margin-left: 42%;
+text-align: center;
+
+}
+.lead{
+  text-align: center;
+  text-decoration: lightseagreen;
 }
