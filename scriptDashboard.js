@@ -26,6 +26,7 @@ $("#saveBtn").on("click", function () {
   $("#humidity").empty()
    $("#windspeed").empty()
     $("#temprature").empty()
+    $("#uvindex").empty()
   var city = $("#autocomplete-input").val()
   console.log(city)
   //saving the city name in array
@@ -51,9 +52,14 @@ $("#saveBtn").on("click", function () {
     liEl.textContent = (searchHistory[i]).toUpperCase();
     ulEl.append(liEl)
 }
-getWeather(city)})
+getWeather(city)
+
+
+})
 
 function getWeather(city){
+  
+  
   var queryURL = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&appid=" + apiKey
   $.ajax({
     url: queryURL,
@@ -65,6 +71,7 @@ function getWeather(city){
       console.log(queryURL);
       // Log the resulting object
       console.log(response);
+ 
       $("#cityName").append("Current Location: " + city.toUpperCase())
       var humidity = response.list[0].main.humidity
       var wind = response.list[0].wind.speed
@@ -74,7 +81,6 @@ function getWeather(city){
     $("#temprature").append("Temprature: " + temp.toFixed(2));
     $("#image").attr("src", ("http://openweathermap.org/img/wn/" + response.list[0].weather[0].icon + "@2x.png"))
 
-      
       var oneDaysForward = moment().add(1, 'day');
       $(".card-text1").append("Date: " + oneDaysForward.format("MM/DD/YYYY"));
       var humidity = response.list[8].main.humidity
@@ -206,7 +212,13 @@ $("#image1").attr("src", ("http://openweathermap.org/img/wn/" + response.list[8]
       var info4 = $("<li>").append("Feels Like: " + feels_like.toFixed(2));
       $("#image10").attr("src", ("http://openweathermap.org/img/wn/" + response.list[16].weather[0].icon + "@2x.png"))
       $(".card-text10").append(info1, info2, info3, info4);
-    })
+   
+
+    
+    var lat= response.city.coord.lat
+    var long= response.city.coord.lon
+    uvIndex(lat, long)
+  })
 }
 $('#list').on('click', 'li', function(){
       console.log('hitt', $(this).text());
@@ -225,8 +237,10 @@ $('#list').on('click', 'li', function(){
   $("#humidity").empty()
    $("#windspeed").empty()
     $("#temprature").empty()
+    $("#uvindex").empty()
       console.log(city)
       getWeather(city)
+    
     })
 function displayRecentSearchHistory() {
       //Using parse to change the string into parse
@@ -259,4 +273,34 @@ if (x.style.display === "none") {
   y.style.display = "block";
 }
 })
+
+function uvIndex(lat, long){
+
+ 
+  var queryURL2 = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon="+ long +"&appid=" +apiKey
+  $.ajax({
+    url: queryURL2,
+    method: "GET"
+  })
+  .then(function (response2) {
+    // Log the queryURL
+    console.log(queryURL2);
+    // Log the resulting object
+    console.log(response2);
+    var uvindex= parseInt(response2.current.uvi)
+  $("#uvindex").append("UV Index: " + uvindex)
+if (uvindex >=0 && uvindex< 3){
+  $("#uvindex").css({'display': 'block', 'background-color' : 'green'});
+}
+else if (uvindex > 3 && uvindex < 10){
+  $("#uvindex").css({'display': 'block', 'background-color' : 'yellow'});
+
+}
+else{
+  $("#uvindex").css({'color' : 'red', 'font-weight':'bold'});
+
+}
+  })
+}
+
 // localStorage.removeItem('searchHistory')
