@@ -1,0 +1,92 @@
+var labelAnimation = function () {
+
+  "use strict";
+
+  var initlabelAnimation = function(){
+	
+    //var excInput=["edit-vat_number","edit-keys-ojoo"];
+    
+    var firstInput=$j(".ojoo-login-box input.form-text").first();
+   //TODO:var firstInput=$j("input.form-text[autofocus]").first();
+    //alert(firstInput.attr('name'));
+    //if($j.inArray(firstInput.attr('id'), excInput) ==-1){
+      firstInput.focus();
+      firstInput.parents('.form-item').addClass('focused');
+    //}
+    $j(".collapsed input.form-text").first().parents('.form-item').removeClass('focused');
+    
+    $j('input.form-text').each(function(){
+      var inputValue = $j(this).val();
+      if ( inputValue !== "" ) $j(this).addClass('filled');
+      
+      $j(this).on('blur input', function() {
+        var inputValue = $j(this).val();
+        if ( inputValue == "" ) {
+          $j(this).removeClass('filled');
+          $j(this).parents('.form-item').removeClass('focused');  
+        } else {
+          $j(this).addClass('filled');
+        }
+      });	
+	
+    });	
+
+    $j('input').on('focus',function(){	
+      $j(this).parents('.form-item').addClass('focused');
+    });
+
+  }
+		
+
+  var initRequiredFields = function(){
+		var errors = 0;
+    $j('input.form-submit').click(function() {
+			
+      if( $j(this).attr('type')==='submit' ){
+				
+        var form=$j(this).closest('form');
+        $j(form).find('input,textarea').each(function(){
+          if( $j(this).prop('required') && !$j.trim($j(this).val()).length) { 
+              $j(this).addClass('error');
+							errors++;
+          } else {
+						$j(this).removeClass("error");
+					}
+        });
+				
+				$j(form).find('.form-checkbox').each(function(i){
+					if( $j(this).prop('required') ) {
+						if( $j(this).is(':checked') ) {
+							$j(this).removeClass('error');
+						} else {
+							errors++;
+							$j(this).addClass('error');
+						}
+					}
+        });
+				
+      }
+			
+    });
+		
+		if(errors > 0){ 
+			return false;
+		} else { 
+			return true;
+		}	
+		
+  };
+	
+  return {
+     initlabelAnimation: initlabelAnimation,
+		 initRequiredFields: initRequiredFields
+  };
+  
+}();
+
+$j(function () {
+  //labelAnimation.initlabelAnimation();
+  addLoadEvent(labelAnimation.initlabelAnimation);
+	addLoadEvent(labelAnimation.initRequiredFields);
+
+});

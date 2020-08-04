@@ -1,0 +1,268 @@
+/* favorites ajax js */
+var path="";
+//$j(function() {
+	
+	function fav_loader(nid,action){
+		var div=$j("#throbber-"+nid);
+		if(action==='show') {
+			div.show();
+			$j('#fav-container-'+nid).removeClass('active');
+			$j('#fav-container-'+nid+'>.favorite_message').empty();
+		}
+		if(action==='hide') {div.hide();}
+		if(action==='over-show') {
+			div.show();
+			$j('.favorites_groups').css({'opacity':'0.3'});
+		}
+		if(action==='over-hide') {
+			div.hide();
+			$j('.favorites_groups').css({'opacity':'1'});
+		}
+	}
+	
+	function confirm_dialog(params){
+		$j("body").append("<div id='TB_overlay'></div><div id='TB_window' class='TB-dialog'></div>");
+		$j("#TB_window").append("<div id='TB_title'><div id='TB_ajaxWindowTitle'><h2 class='title'>Favorites</h2></div><div id='TB_closeAjaxWindow'><a href='#' id='TB_closeWindowButton' title='Close'>close</a></div></div>");
+		$j("#TB_window").append("<div id='TB_ajaxContent'>"+params.message+"</div>");
+		$j("#TB_ajaxContent").append("<div><a href='"+params.url+"' class='form-submit "+params.class+"'>"+params.button+"</a></div>");
+		var left=($j(window).width()-$j("#TB_window").width())/2;
+		var left_per=left/$j(window).width();
+		var top=($j(window).height()-($j("#TB_window").height()*2))/2;
+		var top_per=top/$j(window).height();
+		$j("#TB_window").css({'left':left_per*100+'%','top':top_per*100+'%'});
+		$j("#TB_window").show();	
+	}
+	
+	//ADD NEW GROUP - CALLS ADD NODE TO FAVORITE GROUP AFTERWARDS
+	$j(document).on("submit",".favorites_groups form",function(e) {		
+		e.preventDefault();
+		var $nid=$j(this).parents('.fav-container').attr('data-nid');
+		$j("#fav-container-"+$nid+" .fav-group-add-button").trigger('click');
+	});
+	
+	$j(document).on("click",".fav-group-add-button",function() {
+		var $nid=$j(this).parents('.fav-container').attr('data-nid');
+
+		var newgroup=$j('#title-fav-group-'+$nid).val(); 		
+		var params = 'title='+newgroup; 
+
+		if(newgroup.length>0){
+			fav_loader($nid,'show');
+			var request = new XMLHttpRequest(); 
+			request.open('GET', path+'/favorites_group/add/'+$nid+'?ajax=true&'+params, true); 
+			request.onreadystatechange = function() { 
+				if (request.status === 200) { 
+					$j('#fav-container-'+$nid).html(request.responseText); 
+					fav_loader($nid,'hide');  
+				}
+			}; 
+			request.send();
+			$j(".si_favorite").addClass('update_needed');
+		} return false;
+	
+	});
+	
+	//ADD NODE TO FAVORITE GROUP
+	$j(document).on("click",".favorites_groups > li > a.fav-add",function() {
+		var $nid=$j(this).parents('.fav-container').attr('data-nid');
+		var $gid=$j(this).attr('data-gid');
+		if(typeof $gid === 'undefined'){} 
+		else {
+			fav_loader($nid,'show');
+			var request = new XMLHttpRequest(); 
+			request.open('GET', path+'/favorite_nodes/add/'+$nid+'/'+$gid+'?ajax=true', true);  
+			request.onreadystatechange = function() { 
+				if (request.status === 200) { 
+					$j('#fav-container-'+$nid).html(request.responseText); 
+					fav_loader($nid,'hide'); 
+				}
+			}; 
+			request.send();
+		}
+		return false;
+	});
+	
+	//CLICK-FAV-BUTTON ACTIONS
+	var $nid;
+	$j(document).on("click",".si_favorite", function(e) {
+		$nid=$j(this).parent('.fav-container').attr('data-nid');
+		var $current=$j(this);
+		
+		//if not registered user continue to href
+		if($current.hasClass('si_public')) return;
+		else e.preventDefault();
+
+		//CONFIRM DELETE DIALOG
+		if($current.hasClass('si_active')){ 
+			var params={
+				url:$j(this).attr('href'),
+				class:'confirm-delete',
+				message:'Are you sure you want to remove<br> the sound from your favorites?',
+				button:'Remove'
+			};
+			confirm_dialog(params);
+			
+		} else {
+			//add class to show group list
+			$j('#fav-container-'+$nid).addClass('active');
+			
+			//REFRESH GROUP LIST
+			if($current.hasClass('update_needed')){ //IF NEW GROUP HAS ADDED SOMEWHERE ELSE THEN REFRESH
+				fav_loader($nid,'over-show');
+				var request = new XMLHttpRequest(); 
+				request.open('GET', path+'/favorites_group/check_update/'+$nid+'?ajax=true', true);  
+				request.onreadystatechange = function() { 
+					if (request.status == 200 && request.responseText!='') { 
+						$j('#fav-container-'+$nid+' .favorites_groups').html(request.responseText); 
+						fav_loader($nid,'over-hide'); 
+					}
+				}; 
+				request.send();
+				$current.removeClass('update_needed');
+			} 
+		} 
+	});
+	
+	//DELETE FAVORITE
+	$j(function () {
+		$j(document).on("click",".confirm-delete", function(e) {
+			e.preventDefault();
+			fav_loader($nid,'show');
+			var request = new XMLHttpRequest(); 
+			request.open('GET', path+'/favorite_nodes/delete/'+$nid+'?ajax=true', true);  
+			request.onreadystatechange = function() { 
+				if (request.status === 200) { 
+					// if is favorites page hide node
+					//if(window.location.href.indexOf('favorite_nodes') > -1 || 
+					if(window.location.href.indexOf('favorites') > -1) { 
+						$j('#node-'+$nid).stop().animate({opacity: "0"},800).slideUp(); 
+					}
+					$j('#fav-container-'+$nid).html(request.responseText); 
+					
+					fav_loader($nid,'hide'); 
+				} 
+			}; 
+			request.send();
+		});	
+	});	
+	
+	//CHANGE PRIVACY WITH AJAX
+	$j(document).on("click",".js-share-privacy-status a.fav-privacy-status-button",function(e) {
+		e.preventDefault();
+		$url=$j(this).attr('href');
+
+		$j('.js-share-privacy-status').addClass("throbber_loader_black");
+		var request = new XMLHttpRequest(); 
+		request.open('GET', path+$url+'?ajax=true', true);   
+		request.onreadystatechange = function() { 
+			if (request.status === 200) { 
+				$j('.js-share-privacy-status').html(request.responseText).removeClass("throbber_loader_black"); 
+				$j('.js-share-content').toggleClass('private shared');
+			}
+		}; 
+		request.send();
+
+		return false;
+	});
+	
+//remove class to hide group list
+	var timer;
+	$j(document).on("mouseenter",".fav-container", function() {
+		clearTimeout(timer);
+	});
+	$j(document).on("mouseleave",".fav-container", function() {
+		clearTimeout(timer);
+		$div=$j(this);
+		timer = setTimeout(function(){$div.removeClass('active');}, 2000);
+	});
+	
+	//clicking outside hide elements
+	$j(document).on("click","body", function(event) {
+		if (!$j(event.target).closest(".fav-container").length && $j(".fav-container").hasClass('active')) {
+			$j(".fav-container").removeClass('active');	
+		};
+		if (!$j(event.target).closest(".favorites_toolbar").length && $j('.fav-group-openadd-button:visible').length == 0) {
+			$j(".fav-group-add-form").hide();
+			$j(".fav-group-openadd-button").show();	
+		};
+		if (!$j(event.target).closest(".favorites_toolbar").length && $j('.fav-group-title:visible').length == 0) {
+			$j(".fav-group-edit-form").hide();
+			$j(".fav-group-title").show();	
+		};
+		
+	});
+	
+	//confirm TB TO DELETE -- needs to unify with tb_show()
+	$j(document).on("click",".fav-group-delete-button", function(e) {
+		e.preventDefault();
+		var params={
+				url:$j(this).attr('href'),
+				class:'',
+				message:'Are you sure you want to delete this list?',
+				button:'Delete'
+			};
+		confirm_dialog(params);
+	});	
+	
+	//confirm TB TO change group's privacy -- needs to unify with tb_show()
+	$j(document).on("click",".fav-group-privacy-button", function(e) {
+		e.preventDefault();
+		var params={
+				url:$j(this).attr('href'),
+				class:'',
+				message:'Are you sure you want to change<br>the privacy settings of this list?',
+				button:'Change'
+			};
+		confirm_dialog(params);
+	});	
+	
+	//share popup
+	/*
+	$j(document).on("click",".fav-group-share-button", function(e) {
+		e.preventDefault();
+		$url=$j(this).attr('href');
+		$title=$j(this).attr('data-title');
+		
+		$j("body").append("<div id='TB_overlay' class='page-black-loader'></div><div id='TB_window'></div>");
+		$j("#TB_window").append("<div id='TB_closeAjaxWindow'><a href='#' id='TB_closeWindowButton' title='Close'>close</a></div>");
+		//$j.get(path+'/favorites_group/share',function(data){
+		$j.get(path+$url,function(data){
+			$j("#TB_window").append("<div id='TB_ajaxContent'><h2>Share '"+$title+"'</h2>"+data+"</div>"); 
+			var left=($j(window).width()-$j("#TB_window").width())/2;
+			var left_per=left/$j(window).width();
+			var top=($j(window).height()-$j("#TB_window").height())/2;
+			var top_per=top/$j(window).height();
+			$j("#TB_window").css({'left':left_per*100+'%','top':top_per*100+'%'});
+			$j("#TB_window").show();
+			$j("#TB_overlay").removeClass('page-black-loader');
+			$j("#url-share-group" ).select();
+			
+			//zeroclipboard
+			var clientText = new ZeroClipboard( $j("#text-to-copy"), {
+				moviePath: path+"/modules/contrib/favorites_group/zeroclipboard/ZeroClipboard.swf",
+				debug: false
+			});
+			clientText.on( "load", function(clientText){
+				clientText.on( "complete", function(clientText, args) {	
+					clientText.setText( args.text );
+					//$j('#text-to-copy').fadeOut();
+				});
+			});
+			//
+			
+		});
+	
+	});	*/
+	
+
+	$j(document).on("click","#TB_closeWindowButton", function(e) {
+		e.preventDefault();
+		$j("#TB_overlay").remove();
+		$j("#TB_window").remove();
+	});
+	$j(document).on("click",".TB-dialog #TB_ajaxContent .form-submit", function() {
+		$j("#TB_overlay").remove();
+		$j("#TB_window").remove();
+	});	
+	
+//});

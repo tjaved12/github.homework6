@@ -11,7 +11,14 @@ $("#currentDay").append(date);
 $("#currentTime").append(time)
 var keyWord = "city";
 var apiKey = "872c45617fb73162d55007d41cdff5ee"
+
+var bleep= new Audio();
+bleep.src="bleep3-sound.mp3";
+function loadContent(){
+bleep.play();}
+
 $("#saveBtn").on("click", function () {
+
   $("#cityName"). empty()
   $(".card-text1").empty()
   $(".card-text2").empty()
@@ -27,6 +34,7 @@ $("#saveBtn").on("click", function () {
    $("#windspeed").empty()
     $("#temprature").empty()
     $("#uvindex").empty()
+loadContent()
   var city = $("#autocomplete-input").val()
   console.log(city)
   //saving the city name in array
@@ -240,6 +248,7 @@ $('#list').on('click', 'li', function(){
     $("#uvindex").empty()
       console.log(city)
       getWeather(city)
+      loadContent()
     
     })
 function displayRecentSearchHistory() {
