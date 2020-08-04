@@ -18,7 +18,7 @@ Weather dashboard application with search functionality to find current weather 
 
 ## About The Project
 
-Developers are often tasked with retrieving data from another application's API and using it in the context of their own. Third-party APIs allow developers to access their data and functionality by making requests with specific parameters to a URL. This project will include building a weather dashboard using the OpenWeather API and/or DarkSky API as per user's spefications.
+Developers are often tasked with retrieving data from another application's API and using it in the context of their own. Third-party APIs allow developers to access their data and functionality by making requests with specific parameters to a URL. This project will include building a weather dashboard using the OpenWeather API  as per user's spefications.
 
 ## User Stories
 
@@ -30,7 +30,7 @@ so that I can plan a trip accordingly
 
 ## Development Strategy
 
-* Use the [OpenWeather API](https://openweathermap.org/api) and/or [DarkSky API](https://darksky.net/dev) to retrieve weather data for cities. The documentation includes a section called "How to start" that will provide basic setup and usage instructions.
+* Use the [OpenWeather API](https://openweathermap.org/api) to retrieve weather data for cities. The documentation includes a section called "How to start" that will provide basic setup and usage instructions.
 
 * Use AJAX to hook into the API to retrieve data in JSON format.
 
@@ -57,7 +57,7 @@ so that I can plan a trip accordingly
 
 ## Demo
 
-![weather dashboard](./img/server-side-demo.png)
+![image](https://user-images.githubusercontent.com/66760710/89329572-00af1c00-d65d-11ea-8637-c790e58a7e17.png)
 
 ## User Specifications
 
@@ -79,23 +79,13 @@ so that I can plan a trip accordingly
 
 - [x] Application stores previously searched for cities in localstorage and displays them to the user.
 
-- [x] Application loads last searched city forecast on page load.
 
-## Extra Futures/Spefications
-
-- [x] Use the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) to add the user's current location to the initial landing page.
-
-- [x] Use [DarkSky API](https://darksky.net/dev) to get daily forecast
-
-- [x] Use Materialize CSS for UI
-
-## End Result
 
 
 
 ## Getting Started
 
-Go to  
+Go to  https://tjaved12.github.io/github.homework6/dashboard.html
 
 
 ## Tech Stack
